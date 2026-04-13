@@ -4,150 +4,136 @@
     <title>ORION BOT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { background: transparent; }
-        #toggleBtn {
+        body { background: transparent; margin: 0; padding: 0; overflow: hidden; }
+        #circleBtn {
             position: fixed;
             top: 50%;
             left: 20px;
             transform: translateY(-50%);
             width: 80px;
             height: 80px;
-            z-index: 9999999;
+            z-index: 99999999;
             border-radius: 50%;
-            background: #000033;
-            border: 4px solid #0099ff;
-            box-shadow: 0 0 20px #0099ff, inset 0 0 20px rgba(0,153,255,0.5);
+            background: rgba(0, 100, 255, 0.2);
+            border: 3px solid #0099ff;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
+            box-shadow: 0 0 15px rgba(0,153,255,0.5);
         }
-        #innerLine {
+        #line {
             width: 60%;
-            height: 4px;
+            height: 3px;
             background: #0099ff;
             position: absolute;
-            box-shadow: 0 0 10px #0099ff;
         }
-        #centerDot {
-            width: 20px;
-            height: 20px;
+        #dot {
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: #cceeff;
+            background: #e0f7ff;
             position: absolute;
-            box-shadow: 0 0 15px #ffffff;
-        }
-        #textLabel {
-            position: absolute;
-            bottom: -25px;
-            font-family: Arial;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 0 5px black;
+            box-shadow: 0 0 10px white;
         }
     </style>
 </head>
 <body>
 
-<div id="toggleBtn">
-    <div id="innerLine"></div>
-    <div id="centerDot"></div>
-    <div id="textLabel">OFF</div>
+<div id="circleBtn">
+    <div id="line"></div>
+    <div id="dot"></div>
 </div>
 
 <script>
     // ==============================================
-    // LIST NAMA BARANG
+    // DATA BARANG YANG MAU DIWAR
     // ==============================================
-    const TARGET_ITEMS = [
+    const TARGETS = [
         "Velixir Parfum Icarus Eau de Parfum For Unisex",
         "Velixir Parfums Orion Eau de Parfum for unisex"
     ];
-    const UKURAN = "35ml";
-    let BOT_ON = false;
-    let loop = null;
+    const SIZE = "35ml";
+    let isActive = false;
+    let loopProcess = null;
+    const btn = document.getElementById('circleBtn');
 
     // ==============================================
-    // TOMBOL INTERAKTIF
+    // TOMBOL ON / OFF
     // ==============================================
-    const btn = document.getElementById('toggleBtn');
-    const label = document.getElementById('textLabel');
-
     btn.onclick = function() {
-        if(!BOT_ON) {
-            BOT_ON = true;
-            btn.style.background = "#001133";
+        if(!isActive) {
+            isActive = true;
+            // Ubah jadi HIJAU saat NYALA
             btn.style.borderColor = "#33ff33";
-            btn.style.boxShadow = "0 0 30px #33ff33, inset 0 0 20px rgba(51,255,51,0.5)";
-            document.getElementById('innerLine').style.background = "#33ff33";
-            document.getElementById('innerLine').style.boxShadow = "0 0 10px #33ff33";
-            document.getElementById('centerDot').style.background = "#ffffff";
-            label.innerText = "ON";
-            label.style.color = "#33ff33";
+            btn.style.background = "rgba(0,200,0,0.2)";
+            document.getElementById('line').style.background = "#33ff33";
+            document.getElementById('dot').style.background = "#ffffff";
             startBot();
+            console.log("BOT NYALA - SIAP WAR");
         } else {
-            BOT_ON = false;
-            btn.style.background = "#000033";
+            isActive = false;
+            // Balik jadi BIRU saat MATI
             btn.style.borderColor = "#0099ff";
-            btn.style.boxShadow = "0 0 20px #0099ff, inset 0 0 20px rgba(0,153,255,0.5)";
-            document.getElementById('innerLine').style.background = "#0099ff";
-            document.getElementById('innerLine').style.boxShadow = "0 0 10px #0099ff";
-            document.getElementById('centerDot').style.background = "#cceeff";
-            label.innerText = "OFF";
-            label.style.color = "white";
-            clearInterval(loop);
+            btn.style.background = "rgba(0,100,255,0.2)";
+            document.getElementById('line').style.background = "#0099ff";
+            document.getElementById('dot').style.background = "#e0f7ff";
+            clearInterval(loopProcess);
+            console.log("BOT MATI");
         }
     }
 
     // ==============================================
-    // LOGIC BOT BELI OTOMATIS
+    // INTI PROGRAM BOT
     // ==============================================
     function startBot() {
-        loop = setInterval(() => {
-            if(!BOT_ON) return;
+        loopProcess = setInterval(() => {
+            if(!isActive) return;
 
-            // 1. CEK APAKAH NAMA BARANG SESUAI
-            let pageText = document.body.innerText;
-            let isTarget = TARGET_ITEMS.some(name => pageText.includes(name));
+            // 1. CEK APAKAH BARANG YANG BENER
+            let textContent = document.body.innerText;
+            let isCorrectItem = TARGETS.some(nama => textContent.includes(nama));
 
-            if(isTarget) {
+            if(isCorrectItem) {
+                console.log("BARANG KETEMU!");
+
                 // 2. CARI TOMBOL BELI SEKARANG
-                let buyBtn = Array.from(document.querySelectorAll("button")).find(el => 
-                    el.innerText.includes("Beli Sekarang") && !el.disabled
+                let buyButton = document.querySelector('button') || 
+                                Array.from(document.querySelectorAll('button, div')).find(el => 
+                                    el.textContent.includes("Beli Sekarang") && !el.disabled
                 );
 
-                if(buyBtn) {
-                    console.log("TARGET LOCKED! BUYING...");
+                if(buyButton) {
+                    console.log("BISA DIKLIK! GO GO GO!");
                     
                     // KLIK BELI SEKARANG
-                    buyBtn.click();
+                    buyButton.click();
 
                     setTimeout(() => {
                         // 3. PILIH UKURAN 35ml
-                        let varian = Array.from(document.querySelectorAll("div, span, button")).find(el =>
-                            el.innerText.includes(UKURAN)
+                        let variant = Array.from(document.querySelectorAll('div, span, button')).find(el =>
+                            el.textContent.includes(SIZE)
                         );
-                        if(varian) varian.click();
+                        if(variant) variant.click();
 
                         setTimeout(() => {
                             // 4. KLIK BUAT PESANAN
-                            let checkout = Array.from(document.querySelectorAll("button")).find(el =>
-                                el.innerText.includes("Buat Pesanan")
+                            let orderBtn = Array.from(document.querySelectorAll('button')).find(el =>
+                                el.textContent.includes("Buat Pesanan")
                             );
-                            if(checkout) checkout.click();
+                            if(orderBtn) orderBtn.click();
 
-                            console.log("SUCCESS! BARANG KENA!");
-                        }, 300);
+                            console.log("SELESAI! BARANG DAPET!");
+                        }, 400);
 
-                    }, 300);
+                    }, 400);
                 }
             }
-        }, 100); // CEK SANGAT CEPAT
+        }, 150);
     }
 
-    console.log("%c ORION BOT READY ", "background:black; color:lime; font-size:20px");
-    console.log("Style: Blue Circle");
+    console.log("%c ORION BOT v4.0 ", "background:black; color:cyan; font-size:20px");
+    console.log("Style: Persis seperti gambar");
 </script>
 
 </body>
