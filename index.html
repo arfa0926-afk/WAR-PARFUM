@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ORION BOT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { background: transparent; }
+        #toggleBtn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 120px;
+            height: 50px;
+            z-index: 9999999;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            background: red;
+            color: white;
+            box-shadow: 0 0 15px red;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<button id="toggleBtn">🤖 OFF</button>
+
+<script>
+    // ==============================================
+    // LIST NAMA BARANG YANG MAU DIWAR
+    // ==============================================
+    const TARGET_ITEMS = [
+        "Velixir Parfum Icarus Eau de Parfum For Unisex",
+        "Velixir Parfums Orion Eau de Parfum for unisex"
+    ];
+    const UKURAN = "35ml";
+    let BOT_ON = false;
+    let loop = null;
+
+    // ==============================================
+    // TOMBOL ON/OFF DI LAYAR
+    // ==============================================
+    const btn = document.getElementById('toggleBtn');
+    btn.onclick = function() {
+        if(!BOT_ON) {
+            BOT_ON = true;
+            btn.innerText = "🤖 ON";
+            btn.style.background = "green";
+            btn.style.boxShadow = "0 0 15px lime";
+            startBot();
+        } else {
+            BOT_ON = false;
+            btn.innerText = "🤖 OFF";
+            btn.style.background = "red";
+            btn.style.boxShadow = "0 0 15px red";
+            clearInterval(loop);
+        }
+    }
+
+    // ==============================================
+    // LOGIC BOT
+    // ==============================================
+    function startBot() {
+        loop = setInterval(() => {
+            if(!BOT_ON) return;
+
+            // 1. CEK APAKAH NAMA BARANG SESUAI
+            let pageText = document.body.innerText;
+            let isTarget = TARGET_ITEMS.some(name => pageText.includes(name));
+
+            if(isTarget) {
+                console.log("TARGET DETECTED!");
+
+                // 2. CARI TOMBOL BELI SEKARANG
+                let buyBtn = Array.from(document.querySelectorAll("button")).find(el => 
+                    el.innerText.includes("Beli Sekarang") && !el.disabled
+                );
+
+                if(buyBtn) {
+                    console.log("BISA DIKLIK! EXECUTE!");
+                    
+                    // KLIK BELI SEKARANG
+                    buyBtn.click();
+
+                    setTimeout(() => {
+                        // 3. PILIH UKURAN 35ml
+                        let varian = Array.from(document.querySelectorAll("div, span, button")).find(el =>
+                            el.innerText.includes(UKURAN)
+                        );
+                        if(varian) varian.click();
+
+                        setTimeout(() => {
+                            // 4. KLIK BUAT PESANAN
+                            let checkout = Array.from(document.querySelectorAll("button")).find(el =>
+                                el.innerText.includes("Buat Pesanan")
+                            );
+                            if(checkout) checkout.click();
+
+                            console.log("SUCCESS! KENA BOS!");
+                        }, 300);
+
+                    }, 300);
+                }
+            }
+        }, 100); // CEK SANGAT CEPAT
+    }
+
+    console.log("%c ORION BOT READY ", "background:black; color:lime; font-size:20px");
+    console.log("Target: Icarus & Orion");
+</script>
+
+</body>
+</html>
